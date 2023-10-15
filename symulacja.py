@@ -3,7 +3,6 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import random
 import time
-import math
 
 # Example function to simulate reading analog data from the sensor
 def get_analog_data():
@@ -14,11 +13,14 @@ def get_analog_data():
     else:
         beat_counter += 1
         time_since_beat = (time.time() - beat_start_time) % (1 / 60)
-        return random.randint(90, 120) + math.sin(2 * math.pi * 60 * time_since_beat) * 10  # Simulated heart rate data with 60 Hz oscillation
+        if time_since_beat < 0.00833:  # 60 Hz square wave period is approximately 0.00833 seconds
+            return random.randint(90, 120)  # Simulated heart rate data with square wave
+        else:
+            return random.randint(60, 100)  # Simulated heart rate data
 
 # Example function to convert analog data to BPM
 def convert_to_bpm(analog_data):
-    return analog_data
+    return analog_data % 10  # Ogranicz do cyfr jedności
 
 # Create main window
 root = tk.Tk()
