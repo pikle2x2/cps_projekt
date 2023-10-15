@@ -1,12 +1,11 @@
 import tkinter as tk
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import random
 import time
 
 # Example function to simulate reading analog data from the sensor
 def get_analog_data():
-    return random.randint(60, 100)  # Simulated heart rate data
+    return int(time.time() % 2 == 0)  # Alternates between 0 and 1 every second
 
 # Example function to convert analog data to BPM
 def convert_to_bpm(analog_data):
@@ -19,7 +18,6 @@ def convert_to_bpm(analog_data):
 x_data = []
 y_data = []
 start_time = time.time()
-average_analog_value = 80  # Example average value
 
 # Function to update BPM display
 def update_bpm_display():
@@ -34,12 +32,9 @@ def update_bpm_display():
     ax.plot(x_data, y_data)
     canvas.draw()
 
-    # Check if a beat occurred
-    if analog_data > average_analog_value:
-        print("Beat detected!")
-
     # Schedule the function to run after 1000ms (1 second)
     root.after(1000, update_bpm_display)
+
 # Create main window
 root = tk.Tk()
 root.title("Heart Rate Monitor")
