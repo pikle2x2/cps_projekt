@@ -1,44 +1,68 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation
+import tkinter as tk
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import random
+import time
 
-# Define parameters
-frequency = 10  # Frequency in Hz
-amplitude = 2  # Amplitude in V
-duration = 1   # Duration of animation in seconds
+# Function to simulate reading analog data from the sensor (replace this with actual sensor reading)
+def get_analog_data():
+    return random.randint(60, 100)
 
-# Calculate the angular frequency (2 * pi * frequency)
-omega = 2 * np.pi * frequency
+# Function to convert analog data to BPM
+def convert_to_bpm(analog_data):
+    return int((analog_data - 60) * 1.5)  # Replace this with your conversion formula
 
-# Define time array
-t = np.linspace(0, duration, int(1000 * duration))
+# Function to update BPM display
+def update_bpm_display():
+    analog_data = get_analog_data()
+    bpm = convert_to_bpm(analog_data)
+    bpm_label.config(text=f"Current BPM: {bpm}")
 
-# Create a function to generate the sinusoidal wave
-def generate_wave(t):
-    return amplitude * np.sin(omega * t)
+    # Update graph
+    x_data.append(time.time() - start_time)
+    y_data.append(analog_data)
+    ax.clear()
+    ax.plot(x_data, y_data)
+    canvas.draw()
 
-# Create the figure and axis
-fig, ax = plt.subplots()
-line, = ax.plot([], [])
+    # Schedule the function to run after 1000ms (1 second)
+    root.after(1000, update_bpm_display)
 
-# Set axis limits
-ax.set_xlim(0, duration)
-ax.set_ylim(-2.5, 2.5)
+# Create main window
+root = tk.Tk()
+root.title("Heart Rate Monitor")
 
-# Initialize function to draw each frame
-def init():
-    line.set_data([], [])
-    return line,
+# Create a frame for BPM display
+bpm_frame = tk.Frame(root)
+bpm_frame.pack(side=tk.RIGHT, padx=10, pady=10)
 
-# Function to update animation frames
-def update(frame):
-    x = t[:frame]
-    y = generate_wave(t)[:frame]
-    line.set_data(x, y)
-    return line,
+# Create a label to display BPM
+bpm_label = tk.Label(bpm_frame, font=("Arial", 24))
+bpm_label.pack()
 
-# Create the animation
-ani = FuncAnimation(fig, update, frames=len(t), init_func=init, blit=True, repeat=False, interval=1)
+# Create a frame for the graph
+graph_frame = tk.Frame(root)
+graph_frame.pack(side=tk.LEFT, padx=10, pady=10)
 
-# Display the animation
-plt.show()
+# Create a figure for the graph
+fig = Figure(figsize=(5, 4), dpi=100)
+ax = fig.add_subplot(111)
+ax.set_xlabel('Time (s)')
+ax.set_ylabel('Analog Data')
+ax.set_title('Heart Rate Monitor')
+
+# Create a canvas to display the graph
+canvas = FigureCanvasTkAgg(fig, master=graph_frame)
+canvas.draw()
+canvas.get_tk_widget().pack()
+
+# Initialize data
+x_data = []
+y_data = []
+start_time = time.time()
+
+# Start the data update loop
+update_bpm_display()
+
+# Start the main event loop
+root.mainloop()
